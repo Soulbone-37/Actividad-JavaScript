@@ -1,0 +1,146 @@
+import readline from 'readline';
+import chalk from 'chalk';
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+let contactos = [];
+
+async function MostrarMenu() {
+  console.log(chalk.bold.italic.green("--- Menú ---"));
+  console.log(chalk.italic.blue("1. Agregar Contacto"));
+  console.log(chalk.italic.blue("2. Eliminar Contacto"));
+  console.log(chalk.italic.blue("3. Buscar Contacto"));
+  console.log(chalk.italic.blue("4. Ver Contactos"));
+  console.log(chalk.italic.red("5. Salir"));
+  console.log("");
+}
+
+async function PreguntarOpcion() {
+  return new Promise((resolve) => {
+    rl.question(chalk.italic.green("Elige una opción: "), (respuesta) => {
+      resolve(respuesta);
+    });
+  });
+}
+
+async function PreguntarContacto(pregunta) {
+  return new Promise((resolve) => {
+    rl.question(pregunta, (respuesta) => {
+      resolve(respuesta);
+    });
+  });
+}
+
+async function AgregarContacto() {
+  const nombre = await PreguntarContacto(chalk.italic.blue("Ingrese el nombre del contacto: "));
+  const telefono = await PreguntarContacto(chalk.italic.blue("Ingresa el teléfono del contacto: "));
+  const email = await PreguntarContacto(chalk.italic.blue("Ingresa el e-mail del contacto: "));
+
+  const nuevoContacto = {
+    nombre,
+    telefono,
+    email
+  };
+
+  contactos.push(nuevoContacto);
+  console.log(chalk.italic.green("Contacto agregado exitosamente!"));
+}
+
+async function EliminarContacto() {
+  const nombreEliminar = await PreguntarContacto(chalk.italic.blue("Ingrese el nombre del contacto a eliminar: "));
+
+  const indice = contactos.findIndex(contacto => contacto.nombre === nombreEliminar);
+
+  if (indice !== -1) {
+    contactos.splice(indice, 1);
+    console.log(chalk.italic.green("Contacto eliminado exitosamente!"));
+  } else {
+    console.log(chalk.italic.red("Contacto no encontrado."));
+  }
+}
+ // Buscar un contacto por nombre
+ async function buscarContacto() {
+  console.log(chalk.italic.bold.green("\n=== Buscar Contacto ==="));
+  console.log("");
+   
+  if (contactos.length === 0) {
+      console.log(chalk.italic.red("No hay contactos en la agenda."));
+      console.log("");
+      return;
+  }
+   
+  const nombre = await PreguntarContacto(chalk.italic.blue("Ingrese el nombre a buscar: "));
+  
+  const contactosEncontrados = contactos.filter(
+      contacto => contacto.nombre.toLowerCase().includes(nombre.toLowerCase())
+  );
+   
+  if (contactosEncontrados.length > 0) {
+      console.log(chalk.italic.bold.green("\nContactos encontrados:"));
+      contactosEncontrados.forEach(contacto => {
+          console.log(chalk.bold.yellow("\n------------------------"));
+          console.log(chalk.italic.blue(`Nombre: ${chalk.italic.green(contacto.nombre)}`));
+          console.log(chalk.italic.blue(`Teléfono: ${chalk.italic.green(contacto.telefono)}`));
+          console.log(chalk.italic.blue(`Email: ${chalk.italic.green(contacto.email)}`));
+          console.log(chalk.bold.yellow("------------------------"));
+          console.log("");
+      });
+  } else {
+      console.log(chalk.italic.red("\nNo se encontraron contactos con ese nombre."));
+  }
+}
+
+async function VerContactos() {
+  console.log(chalk.bold.italic.green("\n--- Lista de Contactos ---"));
+
+  if (contactos.length === 0) {
+    console.log(chalk.italic.red("No hay contactos"));
+  } else {
+    contactos.forEach((contacto, index) => {
+      console.log(chalk.bold.italic.green(`\nContacto #${index + 1}`));
+      console.log(chalk.bold.yellow("--------------------------------------------------"));
+      console.log(chalk.italic.blue(`Nombre: ${chalk.italic.green(contacto.nombre)}`));
+      console.log(chalk.italic.blue(`Teléfono: ${chalk.italic.green(contacto.telefono)}`));
+      console.log(chalk.italic.blue(`Email: ${chalk.italic.green(contacto.email)}`));
+      console.log(chalk.bold.yellow("--------------------------------------------------"));
+      console.log("");
+    });
+  }
+}
+
+async function EjecutarMenu() {
+  let bandera = true;
+
+  while (bandera) {
+    await MostrarMenu();
+
+    const opcion = await PreguntarOpcion();
+
+    switch (opcion) {
+      case '1':
+        await AgregarContacto();
+        break;
+      case '2':
+        await EliminarContacto();
+        break;
+        case '3':
+        await buscarContacto();
+        break;
+      case '4':
+        await VerContactos();
+        break;
+      case '5':
+        console.log(chalk.italic.red("Saliendo del programa..."));
+        bandera = false;
+        break;
+      default:
+        console.log(chalk.italic.red("Opción no válida. Intente de nuevo."));
+    }
+  }
+  rl.close();
+}
+
+EjecutarMenu();
